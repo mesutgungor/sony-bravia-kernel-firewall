@@ -4,6 +4,32 @@ A zero-root, kernel-level egress application firewall and real-time network moni
 
 It combines **Linux Kernel eBPF socket filtering (`BpfNetMaps`)**, a **Kernel `/dev/tun` DNS Sinkhole & TLS `ClientHello` SNI Packet Inspector (`VpnService`)**, and a **High-Frequency `/proc/net` Kernel Socket Scanner** with an embedded **Real-Time Web Dashboard (`:8899`)**.
 
+![Live Egress Stream & Connection Alerts](docs/screenshots/live-egress-stream.png)
+
+---
+
+## Real-Time Web Dashboard (`:8899`) Screenshots
+
+### 1. Live Egress Stream & Connection Alerts
+Real-time alert banner and stream showing blocked DNS queries (`BLOCKED (TUN DNS)`) and intercepted TCP/TLS connections (`BLOCKED (TUN SNI)`) with synthetic sinkhole trap IPs (`10.254.0.x`), attributed UID, package name, and 1-click blocking controls:
+![Live Egress Stream](docs/screenshots/live-egress-stream.png)
+
+### 2. Per-App Kernel eBPF Firewall (`BpfNetMaps` Chain 2)
+Direct kernel-level UID filtering via `/sys/fs/bpf/netd_shared/map_netd_uid_owner_map` (`FIREWALL_CHAIN_STANDBY`), dropping 100% of egress/ingress packets for blocked apps (including `com.google.android.tv.remote.service`, `com.google.android.katniss`, `com.sony.dtv.voicesearch`, and `tv.samba.ssm`):
+![Per-App Kernel eBPF Firewall](docs/screenshots/kernel-ebpf-apps.png)
+
+### 3. Domain & IP Rules (`/dev/tun` DNS Sinkhole, Wildcards & `/32` IP Blackholes)
+Manage exact and wildcard domain sinkholes (`*.samba.tv`, `*.doubleclick.net`, `ssm1.internet.sony.tv`, etc.) alongside dynamic `/32` IPv4 kernel blackhole routes:
+![Domain & IP Rules](docs/screenshots/domain-ip-rules.png)
+
+### 4. Active Outbound Kernel Sockets (`/proc/net/tcp*` & `/proc/net/udp*`)
+300ms high-frequency kernel socket poller correlating active sockets with UID, package name, `/dev/tun` reverse-DNS resolution, and live Kernel eBPF status:
+![Active Outbound Kernel Sockets](docs/screenshots/active-kernel-sockets.png)
+
+### 5. Live `/dev/tun` DNS Queries & Sinkhole Resolutions
+Real-time view of every DNS query passing through `tun0`, showing upstream resolutions versus sinkholed trap allocations (`10.254.x.y`):
+![Live DNS Log](docs/screenshots/live-dns-log.png)
+
 ---
 
 ## Why This Exists
@@ -138,6 +164,8 @@ Out of the box, the firewall operates in **Default Allow + Pre-Block Telemetry/M
 │   └── src/
 │       ├── BraviaKernelDaemon.java                    # Privileged uid=2000 Kernel eBPF controller, /proc/net scanner & HTTP API
 │       └── DashboardHtml.java                         # Embedded Real-Time Web Dashboard UI
+├── docs/
+│   └── screenshots/                                   # Live Web Dashboard (:8899) screenshots
 ├── build_and_deploy.sh                                # Zero-Gradle SDK build & one-command ADB deployment script
 └── watchdog.sh                                        # Optional host watchdog for cold power cycles
 ```

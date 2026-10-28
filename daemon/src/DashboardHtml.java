@@ -99,6 +99,11 @@ public class DashboardHtml {
     margin-bottom: 10px;
   }
   .alerts-header h3 { font-size: 14px; color: var(--amber); }
+  #alertsList {
+    max-height: 195px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
   .alert-item {
     display: flex;
     flex-wrap: wrap;
@@ -426,9 +431,17 @@ function addIpRule() {
   apiCall({action: 'block_ip', ip: v});
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+const maskLan = urlParams.get('mask_lan') === '1';
+
 function esc(s) {
   if (s === null || s === undefined) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let str = String(s);
+  if (maskLan) {
+    str = str.replace(/2a02:[0-9a-fA-F:]+/g, '2001:db8:fe::1')
+             .replace(/192\\.168\\.0\\.(\\d+)/g, '192.168.1.$1');
+  }
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 async function refreshState() {
@@ -602,8 +615,19 @@ function renderState() {
   `).join('');
 }
 
-refreshState();
-setInterval(refreshState, 1500);
+const initTab = urlParams.get('tab');
+if (initTab && document.getElementById('tab-' + initTab)) {
+  const btns = document.querySelectorAll('.tab-btn');
+  const map = {events: 0, sockets: 1, apps: 2, domains: 3, dns: 4};
+  if (map[initTab] !== undefined && btns[map[initTab]]) {
+    switchTab(initTab, btns[map[initTab]]);
+  }
+}
+refreshState().then(() => {
+  if (!urlParams.get('oneshot')) {
+    setInterval(refreshState, 1500);
+  }
+});
 </script>
 </body>
 </html>

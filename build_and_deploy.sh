@@ -2,9 +2,10 @@
 set -e
 
 # Locate JDK (Java 17+)
-if [ -z "$JAVA_HOME" ]; then
-  if [ -d "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home" ]; then
-    export JAVA_HOME="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+if [ -z "$JAVA_HOME" ] || [ ! -x "$JAVA_HOME/bin/javac" ]; then
+  CELLAR_JDK=$(find /opt/homebrew/Cellar -maxdepth 7 -path "*/libexec/openjdk.jdk/Contents/Home" 2>/dev/null | tail -n 1)
+  if [ -n "$CELLAR_JDK" ]; then
+    export JAVA_HOME="$CELLAR_JDK"
   elif [ -d "/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home" ]; then
     export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
   fi

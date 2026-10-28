@@ -711,7 +711,7 @@ public class BraviaKernelDaemon {
                 body = new String(cbuf, 0, read);
             }
 
-            if ("GET".equals(method) && ("/".equals(path) || path.startsWith("/index.html"))) {
+            if ("GET".equals(method) && ("/".equals(path) || path.startsWith("/?") || path.startsWith("/index.html"))) {
                 sendHttpResponse(out, 200, "text/html; charset=utf-8", DashboardHtml.HTML);
             } else if ("GET".equals(method) && path.startsWith("/api/state")) {
                 sendHttpResponse(out, 200, "application/json; charset=utf-8", buildStateJson());
