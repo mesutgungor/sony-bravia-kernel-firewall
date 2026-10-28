@@ -1,0 +1,14 @@
+# Build artifacts, compiled DEX/APKs, keystores, and runtime logs
+build/
+*.apk
+*.dex
+*.class
+*.keystore
+*.log
+*.tsv
+*.zip
+
+# macOS / IDE files
+.DS_Store
+.idea/
+*.iml
